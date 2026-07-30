@@ -199,7 +199,7 @@ export default function App() {
                 </h2>
               </div>
               <p className="text-base lg:text-lg text-slate-600 leading-relaxed">
-                Platform digital terpadu yang dirancang khusus sebagai wadah aspirasi, kritik, dan saran bagi seluruh civitas akademika guna mewujudkan pelayanan kampus yang transparan, profesional, akuntabel, serta berkualitas tinggi.
+                Media komunikasi digital bagi seluruh warga kampus untuk menyalurkan aspirasi dan kritik membangun, sebagai komitmen mewujudkan pelayanan institusi yang akuntabel dan berkualitas.
               </p>
               <div className="pt-2">
                 <button
