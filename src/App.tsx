@@ -208,14 +208,6 @@ export default function App() {
                 >
                   Kirim Aspirasi & Masukan Sekarang &rarr;
                 </button>
-                <a
-                  href="https://uigm.ac.id/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center rounded-xl text-sm font-semibold text-[#003366] bg-white border border-[#003366]/30 h-12 px-6 shadow-sm transition-all hover:bg-slate-50 hover:border-[#003366]"
-                >
-                  Kunjungi Web Resmi UIGM &rarr;
-                </a>
               </div>
             </div>
 
@@ -276,16 +268,16 @@ export default function App() {
               </div>
             </div>
 
-            {/* KONTAK RESMI & LAYANAN INFORMASI UIGM */}
-            <div className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 p-8 lg:p-10 space-y-6">
-              <div className="max-w-3xl space-y-3">
-                <h3 className="text-2xl font-extrabold text-[#003366]">Kontak Resmi & Layanan Informasi UIGM</h3>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  Kunjungi lokasi utama atau ikuti jam operasional layanan akademik Universitas Indo Global Mandiri.
+            {/* INFORMASI KAMPUS & SITUS RESMI (3 Kolom) */}
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 p-8 lg:p-10 space-y-8">
+              <div>
+                <h3 className="text-2xl font-extrabold text-[#003366]">Informasi Kampus & Situs Resmi</h3>
+                <p className="text-sm text-slate-600 leading-relaxed mt-1">
+                  Alamat, jam operasional, dan tautan situs web resmi Universitas Indo Global Mandiri.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
                   <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-[#003366]"></span> Lokasi Kampus Utama
@@ -294,12 +286,24 @@ export default function App() {
                     Jl. Kol. H. Burlian No.KM. 7, Srijaya, Kec. Alang-Alang Lebar, Kota Palembang, Sumatera Selatan.
                   </p>
                 </div>
+
                 <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
                   <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-[#003366]"></span> Jam Operasional
                   </h4>
                   <p className="text-xs text-slate-600 leading-relaxed">
                     Senin – Jumat (08.00 - 16.00 WIB)
+                  </p>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
+                  <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#003366]"></span> Situs Web Resmi
+                  </h4>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    <a href="https://uigm.ac.id" target="_blank" rel="noopener noreferrer" className="text-[#003366] underline font-medium hover:text-[#002244]">
+                      www.uigm.ac.id
+                    </a>
                   </p>
                 </div>
               </div>
