@@ -82,7 +82,6 @@ export default function App() {
     e.preventDefault();
     setLoading(true);
 
-    // created_at dihapus agar waktu dicatat oleh server/database secara akurat
     const payload = {
       sender_name: formData.nama,
       category: formData.kategori,
@@ -201,7 +200,7 @@ export default function App() {
               <p className="text-base lg:text-lg text-slate-600 leading-relaxed">
                 Media komunikasi digital bagi seluruh warga kampus untuk menyalurkan aspirasi dan kritik membangun, sebagai komitmen mewujudkan pelayanan institusi yang akuntabel dan berkualitas.
               </p>
-              <div className="pt-2">
+              <div className="pt-2 flex flex-wrap items-center gap-4">
                 <button
                   onClick={() => setCurrentView('user')}
                   className="inline-flex items-center justify-center rounded-xl text-sm font-semibold text-white h-12 px-8 shadow-lg shadow-[#003366]/20 transition-all hover:bg-[#002244] hover:shadow-xl active:scale-95"
@@ -209,6 +208,14 @@ export default function App() {
                 >
                   Kirim Aspirasi & Masukan Sekarang &rarr;
                 </button>
+                <a
+                  href="https://uigm.ac.id/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center rounded-xl text-sm font-semibold text-[#003366] bg-white border border-[#003366]/30 h-12 px-6 shadow-sm transition-all hover:bg-slate-50 hover:border-[#003366]"
+                >
+                  Kunjungi Web Resmi UIGM &rarr;
+                </a>
               </div>
             </div>
 
@@ -267,6 +274,43 @@ export default function App() {
                   <p className="text-xs text-slate-600 leading-relaxed">Pengelola kampus senantiasa mengevaluasi dan memperbaiki fasilitas maupun layanan demi kenyamanan bersama.</p>
                 </div>
               </div>
+            </div>
+
+            {/* KONTAK RESMI & LAYANAN INFORMASI UIGM */}
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 p-8 lg:p-10 space-y-6">
+              <div className="max-w-3xl space-y-3">
+                <h3 className="text-2xl font-extrabold text-[#003366]">Kontak Resmi & Layanan Informasi UIGM</h3>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Kunjungi lokasi utama atau ikuti jam operasional layanan akademik Universitas Indo Global Mandiri.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
+                  <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#003366]"></span> Lokasi Kampus Utama
+                  </h4>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Jl. Kol. H. Burlian No.KM. 7, Srijaya, Kec. Alang-Alang Lebar, Kota Palembang, Sumatera Selatan.
+                  </p>
+                </div>
+                <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
+                  <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#003366]"></span> Jam Operasional
+                  </h4>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Senin – Jumat (08.00 - 16.00 WIB)
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* KUTIPAN MOTIVASI & SLOGAN AKADEMIK KAMPUS */}
+            <div className="bg-gradient-to-r from-[#003366] to-[#002244] rounded-3xl shadow-xl p-8 lg:p-10 text-center text-white space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-sky-200">Slogan Akademik Kampus</h3>
+              <blockquote className="text-base lg:text-lg font-medium italic max-w-2xl mx-auto leading-relaxed text-slate-100">
+                &ldquo;Integritas, Inovasi, dan Keunggulan Global. Bersama membangun budaya akademik Universitas Indo Global Mandiri yang unggul, solutif, dan berdaya saing.&rdquo;
+              </blockquote>
             </div>
 
           </div>
@@ -358,7 +402,7 @@ export default function App() {
       </main>
 
       {/* FOOTER */}
-      <footer className="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500 relative z-10">
+      <footer className="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500 relative z-10 space-y-2">
         <p>Kotak Saran Universitas Indo Global Mandiri 2026</p>
       </footer>
 
