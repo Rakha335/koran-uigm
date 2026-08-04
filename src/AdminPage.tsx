@@ -12,7 +12,6 @@ interface Saran {
 interface Kategori {
   id: number;
   name: string;
-  description: string;
   icon?: string;
 }
 
@@ -20,41 +19,27 @@ interface AdminPageProps {
   suggestions: Saran[];
   categories: Kategori[];
   onDelete: (id: number) => void;
-  onAddCategory: (newCategory: { name: string; description: string; icon: string }) => void;
+  onAddCategory: (newCategory: { name: string; icon: string }) => void;
   onDeleteCategory: (catId: number) => void;
 }
 
-// Helper warna ikon dengan Shield biru dan Lainnya merah
 const renderCategoryIcon = (iconName?: string, categoryName?: string, isActive: boolean = false) => {
   const cleanIcon = (iconName || '').trim().toLowerCase();
   const cleanCat = (categoryName || '').trim().toLowerCase();
   const className = "w-5 h-5 shrink-0";
 
-  // Jika sedang aktif (disorot / dipilih), paksa jadi warna putih agar kontras
   if (isActive) {
     if (cleanCat.includes('keamanan') || cleanIcon.includes('shield')) return <Shield className={className} color="#ffffff" />;
     if (cleanCat.includes('lainnya') || cleanIcon.includes('megaphone')) return <Megaphone className={className} color="#ffffff" />;
     return <Laptop className={className} color="#ffffff" />;
   }
 
-  // Warna spesifik tiap kategori
-  if (cleanCat.includes('fasilitas') || cleanIcon.includes('laptop')) {
-    return <Laptop className={className} color="#2563eb" />; // Biru
-  }
-  if (cleanCat.includes('akademik') || cleanIcon.includes('graduation')) {
-    return <GraduationCap className={className} color="#4f46e5" />; // Indigo / Ungu
-  }
-  if (cleanCat.includes('kebersihan') || cleanIcon.includes('sparkles')) {
-    return <Sparkles className={className} color="#d97706" />; // Oranye / Kuning
-  }
-  if (cleanCat.includes('keamanan') || cleanIcon.includes('shield')) {
-    return <Shield className={className} color="#2563eb" />; // Diubah menjadi Biru
-  }
-  if (cleanCat.includes('lainnya') || cleanIcon.includes('megaphone')) {
-    return <Megaphone className={className} color="#dc2626" />; // Diubah menjadi Merah
-  }
+  if (cleanCat.includes('fasilitas') || cleanIcon.includes('laptop')) return <Laptop className={className} color="#2563eb" />;
+  if (cleanCat.includes('akademik') || cleanIcon.includes('graduation')) return <GraduationCap className={className} color="#4f46e5" />;
+  if (cleanCat.includes('kebersihan') || cleanIcon.includes('sparkles')) return <Sparkles className={className} color="#d97706" />;
+  if (cleanCat.includes('keamanan') || cleanIcon.includes('shield')) return <Shield className={className} color="#2563eb" />;
+  if (cleanCat.includes('lainnya') || cleanIcon.includes('megaphone')) return <Megaphone className={className} color="#dc2626" />;
 
-  // Default
   return <Megaphone className={className} color="#003366" />;
 };
 
@@ -74,7 +59,8 @@ export default function AdminPage({
   const [loginForm, setLoginForm] = useState({ username: '', password: '' });
   const [loginError, setLoginError] = useState('');
 
-  const [newCatForm, setNewCatForm] = useState({ name: '', description: '', icon: 'Laptop' });
+  // State form kategori tanpa field description
+  const [newCatForm, setNewCatForm] = useState({ name: '', icon: 'Laptop' });
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
@@ -116,7 +102,7 @@ export default function AdminPage({
     e.preventDefault();
     if (!newCatForm.name.trim()) return;
     onAddCategory(newCatForm);
-    setNewCatForm({ name: '', description: '', icon: 'Laptop' });
+    setNewCatForm({ name: '', icon: 'Laptop' });
   };
 
   if (!isLoggedIn) {
@@ -194,7 +180,6 @@ export default function AdminPage({
     }
   };
 
-  // Opsi ikon yang disesuaikan dengan kategori Anda
   const iconOptions = [
     { label: 'Fasilitas (Laptop)', value: 'Laptop' },
     { label: 'Akademik (GraduationCap)', value: 'GraduationCap' },
@@ -211,7 +196,6 @@ export default function AdminPage({
         <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm space-y-4">
           <div>
             <h3 className="font-bold text-base" style={{ color: '#003366' }}>ADMINISTRATOR</h3>
-            <p className="text-[11px] text-gray-500">KORAN UIGM v2.9 (Protected)</p>
           </div>
 
           <hr className="border-gray-100" />
@@ -301,7 +285,7 @@ export default function AdminPage({
                     required
                     value={newCatForm.name}
                     onChange={(e) => setNewCatForm({...newCatForm, name: e.target.value})}
-                    placeholder="Contoh: fasilitas, akademik, kebersihan, keamanan, lainnya"
+                    placeholder="Contoh: Fasilitas, Akademik, Kebersihan"
                     className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003366] mt-1"
                   />
                 </div>
@@ -340,16 +324,6 @@ export default function AdminPage({
                   )}
                 </div>
 
-                <div>
-                  <label className="text-xs font-medium text-gray-700">Deskripsi Singkat</label>
-                  <input
-                    type="text"
-                    value={newCatForm.description}
-                    onChange={(e) => setNewCatForm({...newCatForm, description: e.target.value})}
-                    placeholder="Contoh: Terkait fasilitas kampus"
-                    className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003366] mt-1"
-                  />
-                </div>
                 <button
                   type="submit"
                   className="inline-flex items-center justify-center rounded-md text-sm font-medium text-white hover:opacity-95 h-10 px-4 transition shadow-sm"
@@ -369,10 +343,7 @@ export default function AdminPage({
                       <div className="p-2 rounded-lg bg-white border border-gray-200 shadow-sm flex items-center justify-center">
                         {renderCategoryIcon(cat.icon, cat.name, false)}
                       </div>
-                      <div>
-                        <h4 className="text-sm font-bold text-slate-800 capitalize">{cat.name}</h4>
-                        <p className="text-xs text-gray-500">{cat.description || 'Tidak ada deskripsi'}</p>
-                      </div>
+                      <h4 className="text-sm font-bold text-slate-800 capitalize">{cat.name}</h4>
                     </div>
                     <button
                       onClick={() => onDeleteCategory(cat.id)}
@@ -393,12 +364,6 @@ export default function AdminPage({
                   {activeTab === 'Semua' ? 'Semua Data Aspirasi' : `Kategori: ${activeTab}`}
                 </h2>
                 <p className="text-xs text-gray-500 mt-0.5">Daftar masukan mahasiswa dari database.</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                  SECURE ONLINE
-                </span>
               </div>
             </div>
 

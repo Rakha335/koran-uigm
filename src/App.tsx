@@ -25,38 +25,32 @@ interface Saran {
 interface Kategori {
   id: number;
   name: string;
-  description: string;
   icon?: string;
 }
 
-const renderCategoryIcon = (iconName?: string, isSelected?: boolean, categoryName?: string) => {
+const renderCategoryIcon = (iconName?: string, categoryName?: string) => {
   const cleanIcon = (iconName || '').trim().toLowerCase();
   const cleanCategory = (categoryName || '').trim().toLowerCase();
 
-  // Menentukan komponen Lucide-react dan warna persis seperti di halaman admin
   let selectedIcon = <Megaphone className="w-5 h-5 shrink-0" color="#db2777" />;
 
   if (cleanIcon === 'laptop' || cleanIcon.includes('laptop') || cleanCategory.includes('fasilitas')) {
-    selectedIcon = <Laptop className="w-5 h-5 shrink-0" color="#3b82f6" />; // Biru Laptop
+    selectedIcon = <Laptop className="w-5 h-5 shrink-0" color="#3b82f6" />;
   } else if (cleanIcon === 'graduationcap' || cleanIcon.includes('graduation') || cleanIcon.includes('cap') || cleanCategory.includes('akademik')) {
-    selectedIcon = <GraduationCap className="w-5 h-5 shrink-0" color="#4f46e5" />; // Ungu/Indigo Akademik
+    selectedIcon = <GraduationCap className="w-5 h-5 shrink-0" color="#4f46e5" />;
   } else if (cleanIcon === 'sparkles' || cleanIcon.includes('sparkles') || cleanCategory.includes('kebersihan')) {
-    selectedIcon = <Sparkles className="w-5 h-5 shrink-0" color="#d97706" />; // Oranye/Emas Kebersihan
+    selectedIcon = <Sparkles className="w-5 h-5 shrink-0" color="#d97706" />;
   } else if (cleanIcon === 'shield' || cleanIcon.includes('shield') || cleanCategory.includes('keamanan')) {
-    selectedIcon = <Shield className="w-5 h-5 shrink-0" color="#2563eb" />; // Biru Keamanan
+    selectedIcon = <Shield className="w-5 h-5 shrink-0" color="#2563eb" />;
   } else if (cleanIcon === 'bookopen' || cleanIcon.includes('book') || cleanCategory.includes('literatur')) {
-    selectedIcon = <BookOpen className="w-5 h-5 shrink-0" color="#059669" />; // Hijau
+    selectedIcon = <BookOpen className="w-5 h-5 shrink-0" color="#059669" />;
   } else if (cleanIcon === 'building2' || cleanIcon.includes('building') || cleanCategory.includes('gedung') || cleanCategory.includes('kampus')) {
-    selectedIcon = <Building2 className="w-5 h-5 shrink-0" color="#7c3aed" />; // Ungu Gedung
+    selectedIcon = <Building2 className="w-5 h-5 shrink-0" color="#7c3aed" />;
   } else if (cleanIcon === 'users' || cleanIcon.includes('user') || cleanCategory.includes('organisasi')) {
-    selectedIcon = <Users className="w-5 h-5 shrink-0" color="#db2777" />; // Pink Organisasi
+    selectedIcon = <Users className="w-5 h-5 shrink-0" color="#db2777" />;
   }
 
-  return (
-    <div className={`p-2.5 rounded-xl flex items-center justify-center shadow-sm bg-white border border-gray-200 shrink-0 ${isSelected ? 'ring-2 ring-[#003366]' : ''}`}>
-      {selectedIcon}
-    </div>
-  );
+  return <div className="flex items-center justify-center shrink-0">{selectedIcon}</div>;
 };
 
 export default function App() {
@@ -188,7 +182,7 @@ export default function App() {
     }
   };
 
-  const handleAddCategory = async (newCategory: { name: string; description: string; icon?: string }) => {
+  const handleAddCategory = async (newCategory: { name: string; icon?: string }) => {
     const token = sessionStorage.getItem('admin_token');
     try {
       const response = await fetch(`${API_BASE_URL}/categories/`, {
@@ -217,7 +211,8 @@ export default function App() {
     if (!confirm('Apakah Anda yakin ingin menghapus kategori ini?')) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/categories/${catId}`, {
+      // PERBAIKAN: Menambahkan prefiks /admin/ di bawah ini
+      const response = await fetch(`${API_BASE_URL}/admin/categories/${catId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -290,7 +285,6 @@ export default function App() {
         {currentView === 'landing' && (
           <div className="space-y-16 relative z-10 pb-12">
             
-            {/* HERO SECTION 2 KOLOM */}
             <div className="w-full pt-12 pb-6 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
               
               <div className="text-left space-y-6">
@@ -326,7 +320,6 @@ export default function App() {
 
             </div>
 
-            {/* TENTANG UIGM */}
             <div className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 p-8 lg:p-10 space-y-6">
               <div className="max-w-3xl space-y-3">
                 <h3 className="text-2xl font-extrabold text-[#003366]">Universitas Indo Global Mandiri (UIGM)</h3>
@@ -355,7 +348,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* ALUR PELAYANAN & PENGADUAN */}
             <div className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 p-8 lg:p-10 space-y-8">
               <div className="text-center max-w-2xl mx-auto space-y-2">
                 <h3 className="text-2xl font-extrabold text-[#003366]">Alur Pelayanan & Pengaduan Aspirasi</h3>
@@ -383,7 +375,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* INFORMASI KAMPUS */}
             <div className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 p-8 lg:p-10 space-y-8">
               <div>
                 <h3 className="text-2xl font-extrabold text-[#003366]">Informasi Kampus & Situs Resmi</h3>
@@ -424,7 +415,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* SLOGAN KAMPUS */}
             <div className="bg-gradient-to-r from-[#003366] to-[#002244] rounded-3xl shadow-xl p-8 lg:p-10 text-center text-white space-y-4">
               <h3 className="text-xs font-bold uppercase tracking-widest text-sky-200">Slogan Akademik Kampus</h3>
               <blockquote className="text-base lg:text-lg font-medium italic max-w-2xl mx-auto leading-relaxed text-slate-100">
@@ -453,7 +443,8 @@ export default function App() {
                   type="text"
                   value={formData.nama}
                   onChange={(e) => setFormData({...formData, nama: e.target.value})}
-                  className="flex h-11 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2 text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003366] transition-all"
+                  className="flex h-11 w-full rounded-xl bg-transparent px-4 py-2 text-sm text-slate-800 outline-none focus:ring-0 transition-none"
+                  style={{ border: 'none', boxShadow: 'none' }}
                   placeholder="Masukkan nama Anda (atau biarkan kosong sebagai Anonim)..."
                 />
               </div>
@@ -472,22 +463,22 @@ export default function App() {
                         <div
                           key={kat.id}
                           onClick={() => setFormData({...formData, kategori: kat.name})}
-                          className={`cursor-pointer rounded-xl border p-3.5 flex flex-col justify-between transition-all ${
+                          className={`cursor-pointer rounded-xl p-3.5 flex flex-col justify-between transition-none ${
                             isSelected
-                              ? 'border-[#003366] bg-[#003366]/5 shadow-sm ring-1 ring-[#003366]'
-                              : 'border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50/50'
+                              ? 'bg-[#003366]/5'
+                              : 'bg-white hover:bg-slate-50'
                           }`}
+                          style={{ border: 'none' }}
                         >
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between w-full">
                             <div className="flex items-center gap-2.5">
-                              {renderCategoryIcon(kat.icon, isSelected, kat.name)}
+                              {renderCategoryIcon(kat.icon, kat.name)}
                               <h4 className="text-xs font-bold text-slate-800">{kat.name}</h4>
                             </div>
                             {isSelected && (
-                              <span className="h-4 w-4 rounded-full bg-[#003366] text-white text-[10px] flex items-center justify-center font-bold">✓</span>
+                              <span className="h-5 w-5 rounded-full bg-[#003366] text-white text-xs flex items-center justify-center font-bold">✓</span>
                             )}
                           </div>
-                          <p className="text-[11px] text-slate-500 line-clamp-2 mt-2">{kat.description || 'Tidak ada deskripsi'}</p>
                         </div>
                       );
                     })}
@@ -502,7 +493,8 @@ export default function App() {
                   rows={4}
                   value={formData.isiSaran}
                   onChange={(e) => setFormData({...formData, isiSaran: e.target.value})}
-                  className="flex w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003366] transition-all resize-none"
+                  className="flex w-full rounded-xl bg-transparent px-4 py-3 text-sm text-slate-800 outline-none focus:ring-0 transition-none resize-none"
+                  style={{ border: 'none', boxShadow: 'none' }}
                   placeholder="Tuliskan aspirasi, kritik membangun, atau saran perbaikan secara rinci, jelas, dan santun di sini..."
                 ></textarea>
               </div>

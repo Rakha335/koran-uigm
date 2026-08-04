@@ -38,13 +38,12 @@ class CategoryModel(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String(100), unique=True, index=True, nullable=False)
-    description = Column(Text, nullable=True)
-    icon = Column(String(50), nullable=True)  # <-- Tambahkan kolom icon di sini
+    icon = Column(String(50), nullable=True)  # Kolom icon untuk UI
 
 # Membuat tabel otomatis jika belum ada
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="KORAN UIGM PostgreSQL API", version="2.9")
+app = FastAPI(title="KORAN UIGM PostgreSQL API", version="3.0")
 
 # --- CORS ---
 app.add_middleware(
@@ -86,8 +85,7 @@ class FeedbackCreate(BaseModel):
 
 class CategoryCreate(BaseModel):
     name: str
-    description: Optional[str] = None
-    icon: Optional[str] = "GraduationCap"  # <-- Tambahkan icon agar terbaca dari request frontend
+    icon: Optional[str] = "GraduationCap"  # Icon yang dipilih dari frontend
 
 # --- VERIFIKASI TOKEN ---
 def get_current_admin(token: str = Depends(oauth2_scheme)):
@@ -158,8 +156,7 @@ def create_category(data: CategoryCreate, admin: str = Depends(get_current_admin
         
     new_category = CategoryModel(
         name=data.name,
-        description=data.description,
-        icon=data.icon or "GraduationCap"  # <-- Simpan nilai icon ke database
+        icon=data.icon or "GraduationCap"
     )
     db.add(new_category)
     db.commit()
@@ -167,13 +164,20 @@ def create_category(data: CategoryCreate, admin: str = Depends(get_current_admin
     
     return {"success": True, "message": "Kategori berhasil ditambahkan", "data": new_category}
 
-@app.delete("/categories/{category_id}")
+# ENDPOINT HAPUS KATEGORI YANG DISEMPURNAKAN
+@app.delete("/admin/categories/{category_id}")
 def delete_category(category_id: int, admin: str = Depends(get_current_admin), db: Session = Depends(get_db)):
-    item = db.query(CategoryModel).filter(CategoryModel.id == category_id).first()
-    if not item:
-        raise HTTPException(status_code=404, detail="Kategori tidak ditemukan")
-        
-    db.delete(item)
-    db.commit()
-    
-    return {"success": True, "message": "Kategori berhasil dihapus"}
+    try:
+        item = db.query(CategoryModel).filter(CategoryModel.id == category_id).first()
+        if not item:
+            raise HTTPException(status_code=404, detail="Kategori tidak ditemukan")
+            
+        db.delete(item)
+        db.commit()
+        return {"success": True, "message": "Kategori berhasil dihapus"}
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        db.rollback()
+        print(f"Error server saat menghapus kategori: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Kesalahan internal server: {str(e)}")
