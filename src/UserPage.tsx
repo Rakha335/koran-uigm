@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BookOpen, Laptop, Building2, Megaphone, Users, HelpCircle, GraduationCap } from 'lucide-react';
+import { BookOpen, Laptop, Building2, Megaphone, Users, GraduationCap } from 'lucide-react';
 
 interface Kategori {
   id: number;
