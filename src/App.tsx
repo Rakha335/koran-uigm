@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AdminPage from './AdminPage';
+import { Toaster, toast } from 'sonner';
 import { 
   BookOpen, 
   Laptop, 
@@ -54,7 +55,12 @@ const renderCategoryIcon = (iconName?: string, categoryName?: string) => {
 };
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'landing' | 'user' | 'admin'>('landing');
+  const [currentView, setCurrentView] = useState<'landing' | 'user' | 'admin'>(() => {
+    if (window.location.pathname === '/admin') return 'admin';
+    if (window.location.pathname === '/form') return 'user';
+    return 'landing';
+  });
+
   const [suggestions, setSuggestions] = useState<Saran[]>([]);
   const [categories, setCategories] = useState<Kategori[]>([]);
   const [loading, setLoading] = useState(false);
@@ -95,14 +101,12 @@ export default function App() {
     const handlePathChange = () => {
       if (window.location.pathname === '/admin') {
         setCurrentView('admin');
+      } else if (window.location.pathname === '/form') {
+        setCurrentView('user');
       } else {
         setCurrentView('landing');
       }
     };
-
-    if (window.location.pathname === '/admin') {
-      setCurrentView('admin');
-    }
 
     window.addEventListener('popstate', handlePathChange);
     fetchSuggestions();
@@ -121,16 +125,24 @@ export default function App() {
     e.preventDefault();
     
     if (!formData.kategori) {
-      alert('Pilih kategori terlebih dahulu. Mohon tunggu hingga pengelola kampus menyiapkan kategori.');
+      toast.warning('Pilih kategori terlebih dahulu. Mohon tunggu hingga pengelola kampus menyiapkan kategori.');
+      return;
+    }
+
+    // Mencari ID kategori berdasarkan nama yang dipilih user
+    const selectedCategoryObj = categories.find(c => c.name === formData.kategori);
+    if (!selectedCategoryObj) {
+      toast.error('Kategori yang dipilih tidak valid.');
       return;
     }
 
     setLoading(true);
     const finalSenderName = formData.nama.trim() === '' ? 'Anonim' : formData.nama;
 
+    // Payload disesuaikan dengan foreign key category_id di backend
     const payload = {
       sender_name: finalSenderName,
-      category: formData.kategori,
+      category_id: selectedCategoryObj.id,
       message: formData.isiSaran
     };
 
@@ -144,7 +156,7 @@ export default function App() {
       });
 
       if (response.ok) {
-        alert('Berhasil: Aspirasi Anda telah terkirim ke database.');
+        toast.success('Berhasil: Aspirasi Anda telah terkirim ke database.');
         setFormData({ 
           nama: '', 
           kategori: categories[0]?.name || '', 
@@ -153,11 +165,12 @@ export default function App() {
         fetchSuggestions();
         goToLanding();
       } else {
-        alert('Gagal mengirim aspirasi, periksa kembali input Anda.');
+        const errData = await response.json();
+        toast.error(`Gagal mengirim aspirasi: ${errData.detail || 'Periksa kembali input Anda.'}`);
       }
     } catch (error) {
       console.error('Terjadi kesalahan koneksi:', error);
-      alert('Tidak dapat terhubung ke server backend FastAPI.');
+      toast.error('Tidak dapat terhubung ke server backend FastAPI.');
     } finally {
       setLoading(false);
     }
@@ -173,12 +186,14 @@ export default function App() {
         }
       });
       if (response.ok) {
+        toast.success('Aspirasi berhasil dihapus.');
         fetchSuggestions();
       } else {
-        alert('Gagal menghapus data. Sesi Anda mungkin habis.');
+        toast.error('Gagal menghapus data. Sesi Anda mungkin habis.');
       }
     } catch (error) {
       console.error('Kesalahan koneksi saat menghapus:', error);
+      toast.error('Terjadi kesalahan jaringan.');
     }
   };
 
@@ -195,14 +210,15 @@ export default function App() {
       });
 
       if (response.ok) {
-        alert('Kategori berhasil ditambahkan!');
+        toast.success('Kategori berhasil ditambahkan!');
         fetchCategories();
       } else {
         const errData = await response.json();
-        alert(`Gagal menambah kategori: ${errData.detail || 'Periksa kembali input.'}`);
+        toast.error(`Gagal menambah kategori: ${errData.detail || 'Periksa kembali input.'}`);
       }
     } catch (error) {
       console.error('Kesalahan koneksi saat menambah kategori:', error);
+      toast.error('Terjadi kesalahan jaringan.');
     }
   };
 
@@ -211,7 +227,6 @@ export default function App() {
     if (!confirm('Apakah Anda yakin ingin menghapus kategori ini?')) return;
 
     try {
-      // PERBAIKAN: Menambahkan prefiks /admin/ di bawah ini
       const response = await fetch(`${API_BASE_URL}/admin/categories/${catId}`, {
         method: 'DELETE',
         headers: {
@@ -220,13 +235,14 @@ export default function App() {
       });
 
       if (response.ok) {
-        alert('Kategori berhasil dihapus!');
+        toast.success('Kategori berhasil dihapus!');
         fetchCategories();
       } else {
-        alert('Gagal menghapus kategori. Sesi Anda mungkin habis.');
+        toast.error('Gagal menghapus kategori. Sesi Anda mungkin habis.');
       }
     } catch (error) {
       console.error('Kesalahan koneksi saat menghapus kategori:', error);
+      toast.error('Terjadi kesalahan jaringan.');
     }
   };
 
@@ -235,9 +251,17 @@ export default function App() {
     setCurrentView('landing');
   };
 
+  const goToUserForm = () => {
+    window.history.pushState({}, '', '/form');
+    setCurrentView('user');
+  };
+
   return (
     <div className="min-h-screen text-slate-900 font-sans antialiased flex flex-col justify-between bg-slate-50 overflow-y-auto">
       
+      {/* SONNER TOASTER CONFIG */}
+      <Toaster position="top-center" richColors />
+
       {/* NAVBAR */}
       <nav className="sticky top-0 z-50 w-full shadow-md py-3 bg-[#003366] backdrop-blur-md bg-opacity-95">
         <div className="container mx-auto flex items-center justify-between px-3 sm:px-6 lg:px-12 gap-2">
@@ -301,7 +325,7 @@ export default function App() {
                 </p>
                 <div className="pt-2 flex flex-wrap items-center gap-4">
                   <button
-                    onClick={() => setCurrentView('user')}
+                    onClick={goToUserForm}
                     className="inline-flex items-center justify-center rounded-xl text-sm font-semibold text-white h-12 px-8 shadow-lg shadow-[#003366]/20 transition-all hover:bg-[#002244] hover:shadow-xl active:scale-95"
                     style={{ backgroundColor: '#003366' }}
                   >
@@ -443,8 +467,7 @@ export default function App() {
                   type="text"
                   value={formData.nama}
                   onChange={(e) => setFormData({...formData, nama: e.target.value})}
-                  className="flex h-11 w-full rounded-xl bg-transparent px-4 py-2 text-sm text-slate-800 outline-none focus:ring-0 transition-none"
-                  style={{ border: 'none', boxShadow: 'none' }}
+                  className="flex h-11 w-full rounded-xl bg-slate-50 px-4 py-2 text-sm text-slate-800 outline-none border border-slate-200 focus:border-[#003366] transition-all"
                   placeholder="Masukkan nama Anda (atau biarkan kosong sebagai Anonim)..."
                 />
               </div>
@@ -463,12 +486,11 @@ export default function App() {
                         <div
                           key={kat.id}
                           onClick={() => setFormData({...formData, kategori: kat.name})}
-                          className={`cursor-pointer rounded-xl p-3.5 flex flex-col justify-between transition-none ${
+                          className={`cursor-pointer rounded-xl p-3.5 flex flex-col justify-between border transition-all ${
                             isSelected
-                              ? 'bg-[#003366]/5'
-                              : 'bg-white hover:bg-slate-50'
+                              ? 'bg-[#003366]/5 border-[#003366] shadow-sm'
+                              : 'bg-white border-slate-200 hover:bg-slate-50'
                           }`}
-                          style={{ border: 'none' }}
                         >
                           <div className="flex items-center justify-between w-full">
                             <div className="flex items-center gap-2.5">
@@ -493,8 +515,7 @@ export default function App() {
                   rows={4}
                   value={formData.isiSaran}
                   onChange={(e) => setFormData({...formData, isiSaran: e.target.value})}
-                  className="flex w-full rounded-xl bg-transparent px-4 py-3 text-sm text-slate-800 outline-none focus:ring-0 transition-none resize-none"
-                  style={{ border: 'none', boxShadow: 'none' }}
+                  className="flex w-full rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none border border-slate-200 focus:border-[#003366] transition-all resize-none"
                   placeholder="Tuliskan aspirasi, kritik membangun, atau saran perbaikan secara rinci, jelas, dan santun di sini..."
                 ></textarea>
               </div>

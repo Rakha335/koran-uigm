@@ -9,9 +9,9 @@ from jose import JWTError, jwt
 from dotenv import load_dotenv
 
 # Import SQLAlchemy untuk koneksi PostgreSQL
-from sqlalchemy import create_engine, Column, Integer, String, Text
+from sqlalchemy import create_engine, Column, Integer, String, Text, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker, Session, relationship
 
 # Memuat file .env dari folder backend
 load_dotenv()
@@ -23,16 +23,7 @@ engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# --- MODEL TABEL DATABASE ---
-class FeedbackModel(Base):
-    __tablename__ = "feedbacks"
-
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    sender_name = Column(String(150), default="Anonim")
-    category = Column(String(50), default="Umum")
-    message = Column(Text, nullable=False)
-    created_at = Column(String(100), nullable=True)
-
+# --- MODEL TABEL DATABASE (TERHUBUNG DENGAN FOREIGN KEY) ---
 class CategoryModel(Base):
     __tablename__ = "categories"
 
@@ -40,10 +31,27 @@ class CategoryModel(Base):
     name = Column(String(100), unique=True, index=True, nullable=False)
     icon = Column(String(50), nullable=True)  # Kolom icon untuk UI
 
+    # Relasi one-to-many ke feedback
+    feedbacks = relationship("FeedbackModel", back_populates="category_rel", cascade="all, delete-orphan")
+
+class FeedbackModel(Base):
+    __tablename__ = "feedbacks"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    sender_name = Column(String(150), default="Anonim")
+    message = Column(Text, nullable=False)
+    created_at = Column(String(100), nullable=True)
+
+    # Menghubungkan tabel feedbacks ke id di tabel categories
+    category_id = Column(Integer, ForeignKey("categories.id", ondelete="CASCADE"), nullable=False)
+    
+    # Relasi balik ke objek kategori
+    category_rel = relationship("CategoryModel", back_populates="feedbacks")
+
 # Membuat tabel otomatis jika belum ada
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="KORAN UIGM PostgreSQL API", version="3.0")
+app = FastAPI(title="KORAN UIGM PostgreSQL API", version="3.1")
 
 # --- CORS ---
 app.add_middleware(
@@ -72,20 +80,20 @@ def get_db():
     finally:
         db.close()
 
-# --- PWD / SCHEMA MODEL ---
+# --- SCHEMA / PYDANTIC MODEL ---
 class Token(BaseModel):
     access_token: str
     token_type: str
 
 class FeedbackCreate(BaseModel):
     sender_name: Optional[str] = "Anonim"
-    category: Optional[str] = "Umum"
+    category_id: int  # Menggunakan ID Kategori yang berelasi
     message: str
     created_at: Optional[str] = None
 
 class CategoryCreate(BaseModel):
     name: str
-    icon: Optional[str] = "GraduationCap"  # Icon yang dipilih dari frontend
+    icon: Optional[str] = "GraduationCap"
 
 # --- VERIFIKASI TOKEN ---
 def get_current_admin(token: str = Depends(oauth2_scheme)):
@@ -113,15 +121,32 @@ def login_admin(form_data: OAuth2PasswordRequestForm = Depends()):
 # --- ENDPOINT ASPIRASI ---
 @app.get("/feedbacks/")
 def get_feedbacks(db: Session = Depends(get_db)):
-    return db.query(FeedbackModel).all()
+    feedbacks = db.query(FeedbackModel).all()
+    # Format agar frontend tetap bisa membaca nama kategori dengan mulus lewat relasi
+    result = []
+    for f in feedbacks:
+        result.append({
+            "id": f.id,
+            "sender_name": f.sender_name,
+            "category": f.category_rel.name if f.category_rel else "Umum",
+            "category_id": f.category_id,
+            "message": f.message,
+            "created_at": f.created_at
+        })
+    return result
 
 @app.post("/feedbacks/")
 def create_feedback(data: FeedbackCreate, db: Session = Depends(get_db)):
+    # Validasi apakah category_id yang dikirim benar-benar ada di database
+    db_category = db.query(CategoryModel).filter(CategoryModel.id == data.category_id).first()
+    if not db_category:
+        raise HTTPException(status_code=400, detail="Kategori yang dipilih tidak valid atau tidak ditemukan.")
+
     waktu_wib = datetime.now(WIB).strftime("%Y-%m-%d %H:%M")
 
     new_item = FeedbackModel(
         sender_name=data.sender_name or "Anonim",
-        category=data.category or "Umum",
+        category_id=data.category_id,
         message=data.message,
         created_at=waktu_wib
     )
@@ -164,7 +189,7 @@ def create_category(data: CategoryCreate, admin: str = Depends(get_current_admin
     
     return {"success": True, "message": "Kategori berhasil ditambahkan", "data": new_category}
 
-# ENDPOINT HAPUS KATEGORI YANG DISEMPURNAKAN
+# ENDPOINT HAPUS KATEGORI
 @app.delete("/admin/categories/{category_id}")
 def delete_category(category_id: int, admin: str = Depends(get_current_admin), db: Session = Depends(get_db)):
     try:
@@ -179,5 +204,4 @@ def delete_category(category_id: int, admin: str = Depends(get_current_admin), d
         raise he
     except Exception as e:
         db.rollback()
-        print(f"Error server saat menghapus kategori: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Kesalahan internal server: {str(e)}")
